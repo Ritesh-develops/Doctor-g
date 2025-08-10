@@ -11,8 +11,6 @@ import HistoryPage from './pages/HistoryPage'
 function App() {
   const { user, loading } = useAuth()
 
-  // 🔥 DEVELOPMENT MODE - Remove auth guards
-  const DEVELOPMENT_MODE = true // Set to false when backend is ready
 
   if (loading) {
     return (
@@ -34,19 +32,19 @@ function App() {
           />
           <Route 
             path="/dashboard" 
-            element={DEVELOPMENT_MODE ? <DashboardPage /> : (user ? <DashboardPage /> : <Navigate to="/login" />)} 
+            element={(user ? <DashboardPage /> : <Navigate to="/login" />)} 
           />
           <Route 
             path="/chat" 
-            element={DEVELOPMENT_MODE ? <ChatPage /> : (user ? <ChatPage /> : <Navigate to="/login" />)} 
+            element={(user ? <ChatPage /> : <Navigate to="/login" />)} 
           />
           <Route 
             path="/chat/:conversationId" 
-            element={DEVELOPMENT_MODE ? <ChatPage /> : (user ? <ChatPage /> : <Navigate to="/login" />)} 
+            element={(user ? <ChatPage /> : <Navigate to="/login" />)} 
           />
           <Route 
             path="/history" 
-            element={DEVELOPMENT_MODE ? <HistoryPage /> : (user ? <HistoryPage /> : <Navigate to="/login" />)} 
+            element={(user ? <HistoryPage /> : <Navigate to="/login" />)} 
           />
         </Routes>
       </main>
