@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react'
 import { apiClient } from '../api/apiClient'
-import ImageUploader from '../components/ImageUploader'
+import toast from 'react-hot-toast'
 
 const DashboardPage = () => {
   const { user } = useAuth()
@@ -26,6 +26,7 @@ const DashboardPage = () => {
   })
   const [loading, setLoading] = useState(true)
   const [quickUpload, setQuickUpload] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
     loadDashboardData()
@@ -56,16 +57,52 @@ const DashboardPage = () => {
       navigate(`/chat/${response.conversation_id}`)
     } catch (error) {
       console.error('Error creating consultation:', error)
+      toast.error('Failed to create consultation')
     }
   }
 
+  const handleQuickUploadSelect = (file) => {
+    if (!file) return
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/tiff']
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Please select a valid image file (JPEG, PNG, GIF, BMP, TIFF)')
+      return
+    }
+
+    // Validate file size (10MB)
+    if (file.size > 10485760) {
+      toast.error('File size must be less than 10MB')
+      return
+    }
+
+    handleQuickUpload(file)
+  }
+
   const handleQuickUpload = async (file) => {
+    setUploading(true)
+    setQuickUpload(false)
+
     try {
-      const response = await apiClient.createConversation()
-      navigate(`/chat/${response.conversation_id}`)
-      // The upload will be handled in the chat interface
+      // Step 1: Create a new conversation
+      toast.loading('Creating consultation...', { id: 'upload-process' })
+      const conversationResponse = await apiClient.createConversation()
+      const conversationId = conversationResponse.conversation_id
+
+      // Step 2: Upload and analyze the image in that conversation
+      toast.loading('Uploading and analyzing X-ray...', { id: 'upload-process' })
+      await apiClient.analyzeXray(conversationId, file)
+
+      // Step 3: Navigate to the conversation
+      toast.success('X-ray uploaded and analyzed successfully!', { id: 'upload-process' })
+      navigate(`/chat/${conversationId}`)
+
     } catch (error) {
       console.error('Error with quick upload:', error)
+      toast.error('Failed to upload and analyze X-ray', { id: 'upload-process' })
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -177,14 +214,23 @@ const DashboardPage = () => {
               <button
                 key={index}
                 onClick={action.action}
-                className={`${action.color} text-white p-6 rounded-lg shadow hover:shadow-md transition-all duration-200 text-left group`}
+                disabled={uploading}
+                className={`${action.color} text-white p-6 rounded-lg shadow hover:shadow-md transition-all duration-200 text-left group disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 <div className="flex items-center justify-between mb-4">
-                  {action.icon}
+                  {uploading && action.title === 'Quick Upload' ? (
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    action.icon
+                  )}
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{action.title}</h3>
-                <p className="text-white/80 text-sm">{action.description}</p>
+                <h3 className="text-lg font-semibold mb-2">
+                  {uploading && action.title === 'Quick Upload' ? 'Processing...' : action.title}
+                </h3>
+                <p className="text-white/80 text-sm">
+                  {uploading && action.title === 'Quick Upload' ? 'Creating consultation and analyzing X-ray...' : action.description}
+                </p>
               </button>
             ))}
           </div>
@@ -274,7 +320,7 @@ const DashboardPage = () => {
                       Get AI analysis
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      Our YOLO model detects potential issues in your X-ray
+                      Our YOLOv11 model detects potential issues in your X-ray
                     </p>
                   </div>
                 </div>
@@ -318,13 +364,33 @@ const DashboardPage = () => {
                 </button>
               </div>
               
-              <ImageUploader
-                onUpload={handleQuickUpload}
-                showPreview={false}
-              />
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h4 className="text-lg font-medium text-gray-900 mb-2">Upload X-ray Image</h4>
+                <p className="text-sm text-gray-600 mb-4">
+                  Drag & drop an X-ray image here, or click to select
+                </p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleQuickUploadSelect(e.target.files[0])}
+                  className="hidden"
+                  id="quick-upload-input"
+                />
+                <label
+                  htmlFor="quick-upload-input"
+                  className="inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer transition-colors"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Select File
+                </label>
+                <p className="text-xs text-gray-500 mt-3">
+                  Supported formats: JPEG, PNG, GIF, BMP, TIFF (Max 10MB)
+                </p>
+              </div>
               
               <p className="text-sm text-gray-600 mt-4">
-                This will create a new consultation and redirect you to the chat interface.
+                This will create a new consultation, upload your X-ray, analyze it, and redirect you to the chat interface with the results ready.
               </p>
             </div>
           </div>

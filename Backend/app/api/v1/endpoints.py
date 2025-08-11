@@ -29,6 +29,90 @@ logger = logging.getLogger(__name__)
 # Create router for chat endpoints
 chat_router = APIRouter()
 
+import re
+from datetime import datetime, timezone
+
+# Add this helper function at the top of the file
+def generate_conversation_title() -> str:
+    """Generate a smart conversation title like Claude/ChatGPT"""
+    titles = [
+        "Chest X-ray Analysis",
+        "Lung Health Consultation", 
+        "Medical Image Review",
+        "X-ray Interpretation",
+        "Pulmonary Assessment",
+        "Respiratory Evaluation",
+        "Thoracic Imaging Review",
+        "Medical Consultation",
+        "Health Assessment",
+        "Diagnostic Review"
+    ]
+    
+    # Get current time for uniqueness
+    current_time = datetime.now(timezone.utc)
+    
+    # Use time-based selection for variety
+    index = current_time.minute % len(titles)
+    base_title = titles[index]
+    
+    # Add subtle time differentiation if needed
+    if current_time.hour < 12:
+        return f"Morning {base_title}"
+    elif current_time.hour < 17:
+        return f"Afternoon {base_title}"
+    else:
+        return f"Evening {base_title}"
+
+# Update the create_conversation function
+@chat_router.post("/conversations/")
+async def create_conversation(
+    conversation_data: Optional[ConversationCreate] = None,
+    db: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Create a new conversation"""
+    try:
+        # Generate smart title
+        title = conversation_data.title if conversation_data else generate_conversation_title()
+        
+        # Create conversation
+        conversation = Conversation(
+            id=str(uuid.uuid4()),
+            user_id=current_user.id,
+            title=title,
+            patient_context=conversation_data.patient_context if conversation_data else None
+        )
+        
+        db.add(conversation)
+        await db.flush()  # Get the ID without committing
+        
+        # Create initial system message
+        system_message = ChatMessage(
+            conversation_id=conversation.id,
+            role="system",
+            content="Hello! I'm Dr. AI, your medical assistant. I can help analyze your X-ray images and answer questions about the results. Please upload an X-ray image to begin, or feel free to ask any medical questions you might have.",
+            message_type="system"
+        )
+        
+        db.add(system_message)
+        await db.commit()
+        await db.refresh(conversation)
+        
+        return {
+            "conversation_id": conversation.id,
+            "title": conversation.title,
+            "created_at": conversation.created_at,
+            "message": "Conversation created successfully"
+        }
+        
+    except Exception as e:
+        await db.rollback()
+        logger.error(f"Error creating conversation: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create conversation"
+        )
+
 
 @chat_router.get("/conversations/", response_model=List[ConversationSchema])
 async def get_conversations(
