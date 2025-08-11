@@ -209,7 +209,7 @@ const HomePage = () => {
                 to="/login?mode=register"
                 className="inline-flex items-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
               >
-                Start Free Trial
+                Get Started
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
               <Link
