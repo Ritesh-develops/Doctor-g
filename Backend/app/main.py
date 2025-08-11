@@ -12,6 +12,8 @@ import os
 from app.core.config import settings
 from app.api.v1.api import api_router
 from app.db.session import sessionmanager
+from app.services.yolo_service import yolo_service
+from app.services.llm_service import llm_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,17 +34,25 @@ async def lifespan(app: FastAPI):
     sessionmanager.init(settings.DATABASE_URL)
     logger.info("✅ Database connection initialized")
     
-    # Verify YOLO model exists
-    if os.path.exists(settings.YOLO_MODEL_PATH):
-        logger.info("✅ YOLO model found")
-    else:
-        logger.warning("⚠️ YOLO model not found - X-ray analysis will not work")
+    # Initialize YOLO service
+    try:
+        if os.path.exists(settings.YOLO_MODEL_PATH):
+            await yolo_service.initialize_model()
+            logger.info("✅ YOLO service initialized successfully")
+        else:
+            logger.warning("⚠️ YOLO model not found - X-ray analysis will not work")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize YOLO service: {e}")
     
-    # Verify Groq API key
-    if settings.GROQ_API_KEY:
-        logger.info("✅ Groq API key configured")
-    else:
-        logger.warning("⚠️ Groq API key not configured - LLM analysis will not work")
+    # Initialize LLM service
+    try:
+        if settings.GROQ_API_KEY:
+            await llm_service.initialize()
+            logger.info("✅ LLM service initialized successfully")
+        else:
+            logger.warning("⚠️ Groq API key not configured - LLM analysis will not work")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize LLM service: {e}")
     
     # Create upload directory if it doesn't exist
     os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
@@ -196,18 +206,41 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "version": settings.VERSION,
-        "timestamp": time.time(),
-        "services": {
-            "database": "connected",
-            "yolo_model": "loaded" if os.path.exists(settings.YOLO_MODEL_PATH) else "missing",
-            "groq_api": "configured" if settings.GROQ_API_KEY else "missing",
-            "upload_directory": "ready" if os.path.exists(settings.UPLOAD_DIR) else "missing"
+    """Enhanced health check endpoint"""
+    try:
+        # Check YOLO service
+        yolo_status = await yolo_service.get_model_info()
+        yolo_healthy = yolo_status.get("status") == "loaded"
+        
+        # Check LLM service
+        llm_status = await llm_service.get_service_status()
+        llm_healthy = llm_status.get("initialized", False)
+        
+        return {
+            "status": "healthy",
+            "version": settings.VERSION,
+            "timestamp": time.time(),
+            "services": {
+                "database": "connected",
+                "yolo": yolo_status,
+                "llm": llm_status,
+                "upload_directory": "ready" if os.path.exists(settings.UPLOAD_DIR) else "missing"
+            },
+            "overall_health": all([yolo_healthy, llm_healthy])
         }
-    }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "version": settings.VERSION,
+            "timestamp": time.time(),
+            "error": str(e),
+            "services": {
+                "database": "connected",
+                "yolo_model": "loaded" if os.path.exists(settings.YOLO_MODEL_PATH) else "missing",
+                "groq_api": "configured" if settings.GROQ_API_KEY else "missing",
+                "upload_directory": "ready" if os.path.exists(settings.UPLOAD_DIR) else "missing"
+            }
+        }
 
 
 @app.get("/info")

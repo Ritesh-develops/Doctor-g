@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import List, Union, Optional
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     )
     
     # Groq API
-    GROQ_API_KEY: str = Field(default="")
+    GROQ_API_KEY: Optional[str] = None
     GROQ_MODEL: str = Field(default="llama3-70b-8192")
     
     # File Upload

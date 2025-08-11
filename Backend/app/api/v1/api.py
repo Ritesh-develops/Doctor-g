@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1 import auth, scans  # Import directly from v1, not endpoints
+from app.api.v1 import auth, scans, endpoints  # Import endpoints
 
 
 api_router = APIRouter()
@@ -18,6 +18,13 @@ api_router.include_router(
     tags=["medical-scans"]
 )
 
+# Include chat endpoints
+api_router.include_router(
+    endpoints.chat_router,
+    prefix="/chats",
+    tags=["chat"]
+)
+
 
 @api_router.get("/", tags=["root"])
 async def api_root():
@@ -27,6 +34,34 @@ async def api_root():
         "version": "1.0.0",
         "endpoints": {
             "auth": "/auth",
-            "scans": "/scans"
+            "scans": "/scans",
+            "chats": "/chats"
+        },
+        "available_routes": {
+            "authentication": [
+                "POST /auth/register",
+                "POST /auth/login",
+                "POST /auth/refresh",
+                "POST /auth/logout",
+                "GET /auth/me",
+                "PUT /auth/me",
+                "DELETE /auth/me"
+            ],
+            "chat": [
+                "GET /chats/conversations/",
+                "POST /chats/conversations/",
+                "GET /chats/conversations/{conversation_id}",
+                "PUT /chats/conversations/{conversation_id}",
+                "DELETE /chats/conversations/{conversation_id}",
+                "GET /chats/conversations/{conversation_id}/messages",
+                "POST /chats/conversations/{conversation_id}/messages",
+                "POST /chats/conversations/{conversation_id}/analyze",
+                "GET /chats/conversations/{conversation_id}/scans",
+                "GET /chats/health"
+            ],
+            "scans": [
+                "GET /scans/",
+                "GET /scans/test"
+            ]
         }
     }
