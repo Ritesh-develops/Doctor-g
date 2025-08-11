@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # Security
     SECRET_KEY: str = Field(
-        default="dev-secret-key-change-this-in-production-make-it-very-long-and-random"
+        default=""
     )
     ALGORITHM: str = Field(default="HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=30)
@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     
     # Database
     DATABASE_URL: str = Field(
-        default="postgresql+asyncpg://doctorg_user:rj266203@localhost:5432/doctorg_db"
+        default=""
     )
     
     # API Settings
