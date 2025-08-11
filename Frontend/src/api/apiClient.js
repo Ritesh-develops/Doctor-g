@@ -180,6 +180,36 @@ class ApiClient {
       throw error
     }
   }
+
+  async getScans() {
+    try {
+        const response = await this.client.get('/scans/')
+        return response.data
+    } catch (error) {
+        console.error('Failed to load scans:', error)
+        throw error
+    }
+}
+
+async getScansCount() {
+    try {
+        const response = await this.client.get('/scans/count')
+        return response.data.count
+    } catch (error) {
+        console.error('Failed to load scans count:', error)
+        throw error
+    }
+}
+
+async getScansStats() {
+    try {
+        const response = await this.client.get('/scans/stats')
+        return response.data
+    } catch (error) {
+        console.error('Failed to load scans stats:', error)
+        throw error
+    }
+}
 }
 
 export const apiClient = new ApiClient()

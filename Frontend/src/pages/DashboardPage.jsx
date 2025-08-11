@@ -16,6 +16,25 @@ import {
 import { apiClient } from '../api/apiClient'
 import toast from 'react-hot-toast'
 
+const loadDashboardData = async () => {
+  try {
+    const [conversations, scanStats] = await Promise.all([
+      apiClient.getConversations(),
+      apiClient.getScansStats().catch(() => ({ total_scans: 0, month_scans: 0 }))
+    ])
+    
+    setStats({
+      totalConversations: conversations.length,
+      totalScans: scanStats.total_scans || 0,
+      recentActivity: conversations.slice(0, 5)
+    })
+  } catch (error) {
+    console.error('Error loading dashboard data:', error)
+  } finally {
+    setLoading(false)
+  }
+}
+
 const DashboardPage = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
