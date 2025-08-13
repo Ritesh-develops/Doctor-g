@@ -91,7 +91,7 @@ def create_application() -> FastAPI:
         CORSMiddleware,
         allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"],  # Added HEAD
         allow_headers=["*"],
     )
     
@@ -191,10 +191,11 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Health check endpoints
+# Health check endpoints - FIXED: Added HEAD method support
 @app.get("/")
+@app.head("/")  # Add HEAD method support for Render health checks
 async def root():
-    """Root endpoint"""
+    """Root endpoint - supports both GET and HEAD"""
     return {
         "message": "Welcome to Doctor-G API",
         "version": settings.VERSION,
@@ -205,8 +206,9 @@ async def root():
 
 
 @app.get("/health")
+@app.head("/health")  # Add HEAD method support
 async def health_check():
-    """Enhanced health check endpoint"""
+    """Enhanced health check endpoint - supports both GET and HEAD"""
     try:
         # Check YOLO service
         yolo_status = await yolo_service.get_model_info()
@@ -241,6 +243,14 @@ async def health_check():
                 "upload_directory": "ready" if os.path.exists(settings.UPLOAD_DIR) else "missing"
             }
         }
+
+
+# Simple health endpoint for external monitoring
+@app.get("/ping")
+@app.head("/ping")  # Add HEAD method support
+async def ping():
+    """Simple ping endpoint for uptime monitoring"""
+    return {"status": "ok", "timestamp": time.time()}
 
 
 @app.get("/info")
