@@ -10,7 +10,6 @@
 [![YOLOv11](https://img.shields.io/badge/YOLOv11-FF6B6B?style=for-the-badge)](https://ultralytics.com/)
 
 **Advanced X-ray analysis powered by YOLOv11 and LLM technology**
-[📖 Documentation](docs/) | [🐛 Report Bug](issues/) | [💡 Request Feature](issues/)
 
 ---
 
@@ -325,5 +324,6 @@ Your `.env` files contain sensitive information. The `.gitignore` file is alread
 ---
 
 <h3 align="center">🏥 Doctor-G - Making Medical AI Accessible to Everyone</h3>
+
 
 
