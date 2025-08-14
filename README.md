@@ -220,7 +220,77 @@ CUDA-compatible GPU (optional, for faster inference)
     # Run the frontend development server
     npm run dev
     ```
-    ## 📈 Performance
+    ## 🔧 Environment Configuration (.env)
+
+For the application to run correctly, you must create and configure environment files for both the backend and frontend. These files store sensitive information like API keys and database URLs and are kept out of version control for security.
+
+---
+
+### Backend Configuration (`/backend/.env`)
+
+The backend requires keys for database access, JWT security, and external services.
+
+1.  **Navigate to the backend directory:**
+    ```bash
+    cd backend
+    ```
+
+2.  **Create the `.env` file from the template:**
+    ```bash
+    cp .env.example .env
+    ```
+    This command copies the example file to a new `.env` file, which is ignored by Git.
+
+3.  **Edit the `.env` file** and add your specific credentials. It will look like this:
+    ```env
+    # Security: Generate a long, random string for the secret key
+    SECRET_KEY=your-very-long-secret-key-here
+    ACCESS_TOKEN_EXPIRE_MINUTES=30
+    REFRESH_TOKEN_EXPIRE_MINUTES=10080
+
+    # Database: Replace with your actual PostgreSQL connection URL
+    DATABASE_URL=postgresql+asyncpg://username:password@localhost:5432/<database_name>
+
+    # Groq API: Your API key from Groq
+    GROQ_API_KEY=your_groq_api_key_here
+    GROQ_MODEL='any groq model you want
+
+    # File Upload & Model Paths
+    MAX_UPLOAD_SIZE=10485760
+    UPLOAD_DIR=uploads
+    YOLO_MODEL_PATH=models/lung_nodule_detector.pt
+
+    # CORS: A list of frontend URLs that are allowed to access the backend
+    BACKEND_CORS_ORIGINS=["http://localhost:3000","[http://127.0.0.1:3000](http://127.0.0.1:3000)"]
+    ```
+
+---
+
+### Frontend Configuration (`/frontend/.env`)
+
+The frontend needs to know the URL of your backend API.
+
+1.  **Navigate to the frontend directory:**
+    ```bash
+    cd frontend
+    ```
+
+2.  **Create the `.env` file from the template:**
+    ```bash
+    cp .env.example .env
+    ```
+
+3.  **Edit the `.env` file** to point to your running backend server's URL.
+    ```env
+    # This must be the full URL where your backend is running
+    VITE_API_URL=http://localhost:8000
+    ```
+
+---
+
+### 🔒 Security Note
+Your `.env` files contain sensitive information. The `.gitignore` file is already configured to ignore these files, so you will never accidentally commit them to your repository. **Never share your `.env` files or commit them to version control.**
+   ## 📈 Performance
 
 #### Benchmarks
 - **X-ray Analysis**: < 3 seconds average processing time
@@ -255,4 +325,5 @@ CUDA-compatible GPU (optional, for faster inference)
 ---
 
 <h3 align="center">🏥 Doctor-G - Making Medical AI Accessible to Everyone</h3>
+
 
