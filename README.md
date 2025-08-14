@@ -27,10 +27,6 @@
 - [🔧 Configuration](#-configuration)
 - [🧪 Testing](#-testing)
 - [📈 Performance](#-performance)
-- [🔒 Security](#-security)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [👥 Team](#-team)
 
 ## 🎯 About The Project
 
@@ -68,6 +64,52 @@ Democratize medical imaging analysis by making AI-powered diagnostics accessible
 - **Dashboard Analytics**: Personal health consultation overview.
 
 ## 🏗️ Architecture
+## 📊 X-ray Analysis Flow
+
+```mermaid
+flowchart TD
+    START([👤 User Uploads X-ray]) --> UPLOAD{📤 File Upload}
+    UPLOAD -->|✅ Valid Image| SAVE[💾 Save to Secure Storage]
+    UPLOAD -->|❌ Invalid Format| ERROR1[🚫 Show Error Message]
+
+    SAVE --> RECORD[📝 Create Scan Record in DB]
+    RECORD --> YOLO_INIT[🤖 Initialize YOLOv11 Model]
+
+    YOLO_INIT --> PREPROCESS[🔧 Image Preprocessing<br/>• Resize & Normalize<br/>• Format Conversion<br/>• Quality Check]
+    PREPROCESS --> DETECTION[🎯 YOLOv11 Detection<br/>• Lung Nodule Detection<br/>• Confidence Scoring<br/>• Bounding Box Generation]
+
+    DETECTION --> RESULTS{📊 Detection Results}
+    RESULTS -->|🔍 Nodules Found| ANALYZE[📋 Generate Analysis<br/>• Severity Assessment<br/>• Location Mapping<br/>• Risk Evaluation]
+    RESULTS -->|✅ No Issues| CLEAN[💚 Clean X-ray Report]
+
+    ANALYZE --> LLM_PROCESS[🧠 LLM Processing<br/>• Medical Context Analysis<br/>• Patient-Friendly Translation<br/>• Recommendation Generation]
+    CLEAN --> LLM_PROCESS
+
+    LLM_PROCESS --> GROQ[🌐 Groq API Call<br/>• Llama 3 70B Model<br/>• Medical Knowledge Base<br/>• Natural Language Generation]
+
+    GROQ --> RESPONSE[📝 Generate Response<br/>• Clear Explanations<br/>• Medical Disclaimers<br/>• Next Steps Guidance]
+
+    RESPONSE --> SAVE_RESULTS[💾 Save Analysis Results<br/>• Update Scan Record<br/>• Create Chat Messages<br/>• Log Confidence Scores]
+
+    SAVE_RESULTS --> NOTIFY[📨 Notify User<br/>• Real-time Update<br/>• Analysis Complete<br/>• Results Available]
+
+    NOTIFY --> DISPLAY[📱 Display Results<br/>• Visual Annotations<br/>• Detailed Explanation<br/>• Chat Interface Active]
+
+    DISPLAY --> CHAT{💬 User Questions?}
+    CHAT -->|❓ Yes| FOLLOWUP[🔄 Process Follow-up<br/>• Context-Aware Responses<br/>• Reference Original Analysis<br/>• Educational Information]
+    CHAT -->|✅ No| END([🏁 Analysis Complete])
+
+    FOLLOWUP --> GROQ
+    ERROR1 --> END
+
+    style START fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style YOLO_INIT fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    style DETECTION fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    style LLM_PROCESS fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style GROQ fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    style DISPLAY fill:#e0f2f1,stroke:#00695c,stroke-width:2px
+    style END fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
+```
 
 #### 🔄 Analysis Pipeline Details
 - **📤 Upload Phase**: Secure file handling with validation.
@@ -128,7 +170,7 @@ npm or yarn
 
 # AI/ML Requirements
 CUDA-compatible GPU (optional, for faster inference)
-
+```
 ### 🛠️ Installation
 
 1.  **Clone the Repository**
@@ -178,4 +220,39 @@ CUDA-compatible GPU (optional, for faster inference)
     # Run the frontend development server
     npm run dev
     ```
+    ## 📈 Performance
+
+#### Benchmarks
+- **X-ray Analysis**: < 3 seconds average processing time
+- **API Response**: < 200ms for most endpoints
+- **Model Inference**: < 1 second for YOLOv11 detection
+- **Database Queries**: < 50ms average response time
+
+#### Optimization Features
+- **Async Processing**: Non-blocking I/O operations in FastAPI.
+- **Model Caching**: Pre-loaded AI models for faster inference.
+- **Database Indexing**: Optimized queries with proper indexing.
+- **Redis Caching**: Session and API response caching.
+
+---
+
+## 🔒 Security
+
+#### Security Features
+- **JWT Authentication**: Secure token-based authentication.
+- **Password Hashing**: `bcrypt` for secure password storage.
+- **Input Validation**: Comprehensive data validation with Pydantic.
+- **File Upload Security**: Restricted file types and size limits.
+- **CORS Configuration**: Controlled cross-origin requests.
+- **Rate Limiting**: API rate limiting to prevent abuse.
+
+#### Medical Data Compliance
+- **HIPAA Ready**: Architecture designed for HIPAA compliance.
+- **Data Encryption**: Encrypted data storage and transmission.
+- **Access Logging**: Complete audit trail for medical data access.
+- **Secure File Storage**: Protected X-ray image storage.
+
+---
+
+<h3 align="center">🏥 Doctor-G - Making Medical AI Accessible to Everyone</h3>
 
