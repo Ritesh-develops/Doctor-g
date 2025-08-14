@@ -68,51 +68,6 @@ Democratize medical imaging analysis by making AI-powered diagnostics accessible
 - **Dashboard Analytics**: Personal health consultation overview.
 
 ## 🏗️ Architecture
-```mermaid
-graph TB
-    subgraph "🌐 Client Layer"
-        WEB[Web Browser]
-        MOB[Mobile Browser]
-    end
-
-    subgraph "⚛️ Frontend Layer"
-        REACT[React Application<br/>📱 Responsive UI<br/>🔄 Real-time Chat<br/>📤 File Upload]
-    end
-
-    subgraph "🖥️ Backend Services"
-        API[FastAPI Server<br/>🔐 JWT Authentication<br/>📋 Data Validation<br/>🔄 Async Processing]
-
-        subgraph "🤖 AI Services"
-            YOLO[YOLOv11 Service<br/>🫁 Lung Nodule Detection<br/>📊 Confidence Scoring<br/>📍 Bounding Box Prediction]
-            LLM[LLM Service<br/>🧠 Medical Interpretation<br/>💬 Patient Communication<br/>❓ Follow-up Q&A]
-        end
-    end
-
-    subgraph "💾 Data Layer"
-        DB[(PostgreSQL<br/>👤 User Management<br/>💬 Chat History<br/>🏥 Medical Records)]
-        REDIS[(Redis Cache<br/>⚡ Session Storage<br/>📊 Performance Cache)]
-        FS[File System<br/>🖼️ X-ray Images<br/>📁 Secure Storage)]
-    end
-
-    subgraph "🌍 External APIs"
-        GROQ[Groq API<br/>🦙 Llama 3 70B<br/>🔬 Medical Knowledge<br/>💡 Smart Responses]
-    end
-
-    WEB --> REACT
-    MOB --> REACT
-    REACT --> API
-    API --> YOLO
-    API --> LLM
-    API --> DB
-    API --> REDIS
-    API --> FS
-    LLM --> GROQ
-
-    style REACT fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
-    style API fill:#009688,stroke:#333,stroke-width:2px,color:#fff
-    style YOLO fill:#ff6b6b,stroke:#333,stroke-width:2px,color:#fff
-    style LLM fill:#4ecdc4,stroke:#333,stroke-width:2px,color:#fff
-    style DB fill:#336791,stroke:#333,stroke-width:2px,color:#fff
 
 #### 🔄 Analysis Pipeline Details
 - **📤 Upload Phase**: Secure file handling with validation.
@@ -223,3 +178,4 @@ CUDA-compatible GPU (optional, for faster inference)
     # Run the frontend development server
     npm run dev
     ```
+
