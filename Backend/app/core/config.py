@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     
     # Groq API
     GROQ_API_KEY: Optional[str] = None
-    GROQ_MODEL: str = Field(default="llama3-70b-8192")
+    GROQ_MODEL: str = Field(default="llama-3.3-70b-versatile")
     
     # File Upload
     MAX_UPLOAD_SIZE: int = Field(default=10485760)  # 10MB
